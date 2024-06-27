@@ -1,0 +1,73 @@
+﻿@model Application
+
+@{
+    ViewData["Title"] = "Подтверждение заявки на обмен валюты";
+}
+
+<h2 class="text-center header">Подтверждение заявки на обмен валюты</h2>
+
+<div class="row d-flex align-item-center justify-content-center ">
+    <div class="col-md-6 card p-3 application">
+        <div class="mb-3">
+            <label class="control-label text-tittle">Банк партнер</label>
+            <div class="text">@Model.Bank?.Name - @Model.Bank?.Address</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Дата и время посещения</label>
+            <div class="text">@Model.ApointmentDateTime</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Имя</label>
+            <div class="text">@Model.User?.Name</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Хочу продать</label>
+            <div class="text">@Model.Amount @Model.CurrencyFrom</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Получаю</label>
+            <div class="text">@Model.AmountDue @Model.CurrencyTo</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Email</label>
+            <div class="text">@Model.User?.Email</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Телефон</label>
+            <div class="text">@Model.User?.PhoneNumber</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="control-label text-tittle">Дополнительная информация</label>
+            <div class ="text">@Model.AdditionalInfo</div>
+        </div>
+
+        <form asp-action="SaveApplication" method="post">
+            <input type="hidden" asp-for="Amount" />
+            <input type="hidden" asp-for="AmountDue" />
+            <input type="hidden" asp-for="CurrencyFrom" />
+            <input type="hidden" asp-for="CurrencyTo" />
+            <input type="hidden" asp-for="AdditionalInfo" />
+            <input type="hidden" asp-for="UserId" />
+            <input type="hidden" asp-for="CreatedAt" />
+            <input type="hidden" asp-for="Status" />
+            <input type="hidden" asp-for="BankId" />
+            <input type="hidden" asp-for="ApointmentDateTime" />
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-on-page">Подтвердить</button>
+                <a asp-action="ExchangeApplication" class="btn btn-secondary btn-on-page">Назад</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section css {
+    <link rel="stylesheet" href="~/css/confirmApp.css" asp-append-version="true" />
+}

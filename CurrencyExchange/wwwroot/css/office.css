@@ -1,0 +1,83 @@
+﻿h1{
+    font-size:30pt;
+    font-weight:400;
+}
+
+.tabs {
+    color: #9b2d30;
+    font-weight: 400;
+}
+
+    .tabs:hover {
+        color: #e48c8c;
+        background-color: #FFFAFA;
+        border:hidden;
+    }
+.btn-primary {
+    background-color: white;
+    color: #9b2d30;
+    border-color: red;
+    text-align: left;
+    margin-top:10px;
+}
+
+    .btn-primary:hover {
+        border-color: #e48c8c;
+        color: #e48c8c;
+        background-color: white;
+    }
+    .btn-primary:active, .btn-primary, .btn-primary:focus-visible {
+        border-color: red;
+        box-shadow: 0 0 5px rgba(255, 0, 0, 0.5) !important;
+        outline: none;
+    }
+
+.card {
+    border: hidden;
+    border-radius: 10px;
+    background-color: #FFFAFA;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+p{
+    font-size:12pt;
+    padding:2px 0;
+}
+
+.table {
+    margin: 0 auto;
+    max-width: 1000px;
+    border-color: #FFFAFA;
+    border-bottom-color: #c7c5cb;
+    padding: 10px;
+}
+
+.table-responsive {
+    max-height: 610px;
+    overflow-y: scroll;
+    border-radius: 10px;
+    margin-bottom: 50px;
+    background-color: #FFFAFA;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+    .table-responsive::-webkit-scrollbar {
+        display: none;
+        width: 10px;
+    }
+
+    .table-responsive::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 5px;
+    }
+
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 5px;
+        left: -10px;
+    }
+.tr-tbody {
+    height: 70px;
+}

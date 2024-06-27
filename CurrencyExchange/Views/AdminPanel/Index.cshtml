@@ -1,0 +1,280 @@
+﻿@using CurrencyExchange.ViewModels
+@model AdminPanelVM
+
+@{
+    ViewData["Title"] = "Административная панель";
+}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4 header">Административная панель</h2>
+
+    <div class="mb-4">
+        <form asp-action="Index" method="get" class="form-inline">
+            <div class="form-group mr-2">
+                <label for="bankAddress" class="mr-2">Фильтр по отделению банка:</label>
+                <select name="bankAddress" id="bankAddress" class="form-control">
+                    <option value="">Все отделения</option>
+                    @foreach (var bank in Model.Banks!)
+                    {
+                        <option value="@bank.Address">@bank.Name - @bank.Address</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">Фильтровать</button>
+        </form>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12 mb-4">
+            <div class="card w-100 mx-auto">
+                <div class="card-header">
+                    Заявки на обмен валюты
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Пользователь</th>
+                                <th>Сумма</th>
+                                <th>Валюта к продаже</th>
+                                <th>Сумма Итог</th>
+                                <th>Валюта к получению</th>
+                                <th>Доп информация</th>
+                                <th>Дата создания</th>
+                                <th>Банк</th>
+                                <th>Дата посещения</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var application in Model.Applications!)
+                            {
+                                <tr>
+                                    <td>@application.User?.Name</td>
+                                    <td>@application.Amount</td>
+                                    <td>@application.CurrencyFrom</td>
+                                    <td>@application.AmountDue</td>
+                                    <td>@application.CurrencyTo</td>
+                                    <td>@application.AdditionalInfo</td>
+                                    <td>@application.CreatedAt.ToLongDateString()</td>
+                                    <td>@application.Bank?.Name - @application.Bank?.Address</td>
+                                    <td>@application.ApointmentDateTime</td>
+                                    <td>
+                                        <form asp-action="UpdateApplicationStatus" method="post">
+                                            <input type="hidden" name="ApplicationId" value="@application.AplicationId" />
+                                            <select name="ApplicationStatus" class="form-control mb-2" onchange="handleStatusChange(this)">
+                                                @foreach (var status in Enum.GetValues(typeof(CurrencyExchange.Enums.ApplicationStatus)))
+                                                {
+                                                    @if (application.Status == status.ToString())
+                                                    {
+                                                        <option value="@status" selected>@status</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@status">@status</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <input type="hidden" name="RejectionReason" id="RejectionReason-@application.AplicationId" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Обновить</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="card w-100 mx-auto">
+                <div class="card-header">
+                    Запросы на международные переводы
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Пользователь</th>
+                                <th>Сумма</th>
+                                <th>Валюта</th>
+                                <th>Имя получателя</th>
+                                <th>Счет получателя</th>
+                                <th>Адрес получателя</th>
+                                <th>Дата создания</th>
+                                <th>Доп информация</th>
+                                <th>Банк</th>
+                                <th>Дата посещения</th>
+                                <th>Статус</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var transfer in Model.Transfers!)
+                            {
+                                <tr>
+                                    <td>@transfer.User?.Name</td>
+                                    <td>@transfer.Amount</td>
+                                    <td>@transfer.Currency</td>
+                                    <td>@transfer.RecipientName</td>
+                                    <td>@transfer.RecipientAccount</td>
+                                    <td>@transfer.RecipientAddress</td>
+                                    <td>@transfer.CreatedAt.ToLongDateString()</td>
+                                    <td>@transfer.AddittionalInfo</td>
+                                    <td>@transfer.Bank?.Name - @transfer.Bank?.Address</td>
+                                    <td>@transfer.ApointmentDateTime</td>
+                                    <td>
+                                        <form asp-action="UpdateTransferStatus" method="post">
+                                            <input type="hidden" name="TransferId" value="@transfer.Id" />
+                                            <select name="TransferStatus" class="form-control mb-2" onchange="handleStatusChange(this)">
+                                                @foreach (var status in Enum.GetValues(typeof(CurrencyExchange.Models.TransferStatus)))
+                                                {
+                                                    @if (transfer.Status == status.ToString())
+                                                    {
+                                                        <option value="@status" selected>@status</option>
+                                                    }
+                                                    else
+                                                    {
+                                                        <option value="@status">@status</option>
+                                                    }
+                                                }
+                                            </select>
+                                            <input type="hidden" name="RejectionReason" id="RejectionReason-@transfer.Id" />
+                                            <button type="submit" class="btn btn-primary btn-sm">Обновить</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 mb-4">
+            <div class="card w-100 mx-auto">
+                <div class="card-header">
+                    Вопросы
+                </div>
+                <div class="card-body table-responsive">
+                    <table class="table table-striped table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Имя</th>
+                                <th>Вопрос</th>
+                                <th>Ответ</th>
+                                <th>Выводить на страницу FAQ?</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var question in Model.Questions!)
+                            {
+                                <tr>
+                                    <td>@question.Name</td>
+                                    <td>@question.Quest</td>
+                                    <td>
+                                        @if (question.Answer == null)
+                                        {
+                                            <form asp-controller="AdminPanel" asp-action="AddAnswer" method="post">
+                                                <input type="hidden" name="questionId" value="@question.Id" />
+                                                <textarea name="answer" class="form-control" rows="3" required></textarea>
+                                                <button type="submit" class="btn btn-primary mt-2">Ответить</button>
+                                            </form>
+                                        }
+                                        else
+                                            @question.Answer
+
+                                    </td>
+                                    <td>
+                                        <form asp-controller="AdminPanel" asp-action="UpdateQuestionIsMain" method="post" class="d-flex align-items-center">
+                                            <input type="hidden" name="questionId" value="@question.Id" />
+                                            <div class="form-check flex-grow-1">
+                                                <input class="form-check-input" type="checkbox" name="isMain" value="true" @(question.IsMain ? "checked" : "") />
+                                            </div>
+                                            <button type="submit" class="btn btn-primary btn-sm ml-2">Обновить</button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form asp-controller="AdminPanel" asp-action="DeleteQuestion" method="post" onsubmit="return confirm('Вы уверены, что хотите удалить этот вопрос?');">
+                                            <input type="hidden" name="questionId" value="@question.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="rejectionReasonModal" tabindex="-1" role="dialog" aria-labelledby="rejectionReasonModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="rejectionReasonModalLabel">Причина отказа</h5>
+            </div>
+            <div class="modal-body">
+                <textarea id="rejectionReasonText" class="form-control" rows="4" placeholder="Укажите причину отказа"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="submitRejectionReason()">Сохранить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentApplicationId = null;
+        let currentTransferId = null;
+        let formToSubmit = null;
+
+        function handleStatusChange(selectElement) {
+            const selectedStatus = selectElement.value;
+            const form = selectElement.closest('form');
+            if (selectedStatus === 'Rejected') {
+                formToSubmit = form;
+                currentApplicationId = form.querySelector('input[name="ApplicationId"]') ? form.querySelector('input[name="ApplicationId"]').value : null;
+                currentTransferId = form.querySelector('input[name="TransferId"]') ? form.querySelector('input[name="TransferId"]').value : null;
+                $('#rejectionReasonModal').modal('show');
+            }
+        }
+
+        function showRejectionReasonModal(event, id) {
+            event.preventDefault();
+            currentApplicationId = id;
+            $('#rejectionReasonModal').modal('show');
+        }
+
+        function submitRejectionReason() {
+            const rejectionReason = document.getElementById('rejectionReasonText').value;
+            if (currentApplicationId) {
+                document.getElementById('RejectionReason-' + currentApplicationId).value = rejectionReason;
+            } else if (currentTransferId) {
+                document.getElementById('RejectionReason-' + currentTransferId).value = rejectionReason;
+            }
+            $('#rejectionReasonModal').modal('hide');
+            if (formToSubmit) {
+                formToSubmit.submit();
+            }
+        }
+
+        document.addEventListener('submit', function (event) {
+            const form = event.target;
+            const selectElement = form.querySelector('select[name="ApplicationStatus"], select[name="TransferStatus"]');
+            if (selectElement && selectElement.value === 'Rejected' && !formToSubmit) {
+                event.preventDefault();
+                handleStatusChange(selectElement);
+            }
+        });
+    </script>
+
+}
+
+@section css{
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+}

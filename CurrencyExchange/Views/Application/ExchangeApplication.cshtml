@@ -1,0 +1,285 @@
+﻿@using CurrencyExchange.CurrencyEnum
+@using CurrencyExchange.ViewModels
+@model ApplicationVM
+
+@{
+    ViewData["Title"] = "Заявка на обмен валюты";
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var key in ViewData.ModelState.Keys)
+        {
+            foreach (var error in ViewData.ModelState[key]!.Errors)
+            {
+                @error.ErrorMessage
+
+                <br />
+            }
+        }
+    </div>
+}
+<div class="exchange-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="exchange-title">Обмен валюты</h1>
+                <p class="exchange-subtitle">Выгодный обмен валют от банка. Информация о курсах обмена иностранных валют является справочной и может меняться в течение дня</p>
+            </div>
+            <div class="col-md-4 text-left">
+                <img src="\images\icon4.png" alt="Currency Exchange" class="exchange-image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="exchangeForm" class="row d-flex align-items-center justify-content-center">
+    <div class="divider"></div>
+    <h1 class="form-tittle">Заявка на обмен валюты</h1>
+    <div class="col-md-8 card p-5">
+        <form asp-action="SubmitApplication" method="post" id="submitForm">
+            <div class="row">
+                <div class="card mb-4 h-100">
+                    <div class="card-header">
+                        Банк партнер
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="BankId" class="form-label">Банк</label>
+                            <select asp-for="BankId" class="form-control" required>
+                                @foreach (var bank in ViewBag.Banks! as SelectList)
+                                {
+                                    <option value="@bank.Value">@bank.Text</option>
+                                }
+                            </select>
+                            <span asp-validation-for="BankId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mb-4 h-100">
+                    <div class="card-header">
+                        Дата и время посещения
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 row">
+                            <div class="col-md-6">
+                                <label asp-for="AppointmentDate" class="form-label">Дата</label>
+                                <input asp-for="AppointmentDate" type="date" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AppointmentTime" class="form-label">Время</label>
+                                <input asp-for="AppointmentTime" type="time" class="form-control" required min="09:00" max="18:00" />
+                                <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Личные данные
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="FName" class="form-label">Имя</label>
+                                <input asp-for="FName" class="form-control" />
+                                <span asp-validation-for="FName" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label">Электронная почта</label>
+                                <input asp-for="Email" class="form-control" readonly />
+                                <span asp-validation-for="Email" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Phone" class="form-label">Телефон</label>
+                                <input asp-for="Phone" class="form-control" readonly />
+                                <span asp-validation-for="Phone" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Детали обмена
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="row mb-3">
+                                    <div class="col mx-3">
+                                        <label asp-for="CurrencyFrom" class="form-label">У меня</label>
+                                        <select asp-for="CurrencyFrom" class="form-control">
+                                            @foreach (var currency in Enum.GetValues(typeof(AvailableValute)))
+                                            {
+                                                <option value="@currency">@currency</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="CurrencyFrom" class="text-danger"></span>
+                                    </div>
+                                    <div class="col text-center mx-3">
+                                        <label class="form-label">&nbsp;</label>
+                                        <div>&rarr;</div>
+                                    </div>
+                                    <div class="col mx-3">
+                                        <label asp-for="CurrencyTo" class="form-label">Я получу</label>
+                                        <select asp-for="CurrencyTo" class="form-control">
+                                            @foreach (var currency in Enum.GetValues(typeof(AvailableValute)))
+                                            {
+                                                <option value="@currency">@currency</option>
+                                            }
+                                        </select>
+                                        <span asp-validation-for="CurrencyTo" class="text-danger"></span>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label asp-for="Amount" class="form-label">Хочу продать (сумма)</label>
+                                    <input asp-for="Amount" class="form-control" />
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                    <p id="conversionResult">Вы получите: </p>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="AdditionalInfo" class="form-label">Дополнительная информация</label>
+                                <textarea asp-for="AdditionalInfo" class="form-control" rows="2"></textarea>
+                                <span asp-validation-for="AdditionalInfo" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <p style="font-weight:500;font-size:24pt;text-align:left;">Введите параметры</p>
+                <p style="margin-bottom:50px; opacity:0.7;text-align:left;"> Нажмите кнопку Продолжить</p>
+                <div class="text-center">
+                    <button type="submit" form="submitForm" class="btn btn-primary btn-on-page">Продолжить</button>
+                    <button type="button" class="btn btn-secondary btn-on-page" onclick="location.href='@Url.Action("Index", "Valute")'">
+                        На главную
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="divider"></div>
+    <h2 class="map-title">Банки партнеры</h2>
+    <div id="map"></div>
+</div>
+
+<script>
+    document.getElementById('Amount').addEventListener('input', updateConversion);
+    document.getElementById('CurrencyFrom').addEventListener('change', updateConversion);
+    document.getElementById('CurrencyTo').addEventListener('change', updateConversion);
+
+    function updateConversion() {
+        var amount = document.getElementById('Amount').value;
+        var currencyFrom = document.getElementById('CurrencyFrom').value;
+        var currencyTo = document.getElementById('CurrencyTo').value;
+
+        if (amount && currencyFrom && currencyTo) {
+            fetch(`/Application/GetConversionRate?currencyFrom=${currencyFrom}&currencyTo=${currencyTo}&amount=${amount}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('conversionResult').innerText = `Вы получите: ${data.result} ${currencyTo}`;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+</script>
+
+@section css {
+    <link rel="stylesheet" href="~/css/application.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        ymaps.ready(init);
+        function init() {
+            // Создание карты.
+            var myMap = new ymaps.Map("map", {
+                center: [47.222078, 39.720349], // Координаты центра карты (Ростов-на-Дону)
+                zoom: 12
+            });
+
+            // Добавление меток.
+            var placemarks = [
+                {
+                    coords: [47.283833, 39.715286],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, просп. Космонавтов, 15'
+                },
+                {
+                    coords: [47.235676, 39.714530],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, площадь Гагарина, 6/87'
+                },
+                {
+                    coords: [47.207645, 39.632330],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, Коммунистический просп., 27'
+                },
+                {
+                    coords: [47.232200, 39.760530],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, 1-я Майская ул., 3'
+                },
+                {
+                    coords: [47.219887, 39.719437],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, Ворошиловский просп., 31'
+                }
+            ];
+
+            placemarks.forEach(function (placemark) {
+                var myPlacemark = new ymaps.Placemark(placemark.coords, {
+                    hintContent: placemark.hint,
+                    balloonContent: placemark.balloon
+                });
+                myMap.geoObjects.add(myPlacemark);
+            });
+        }
+    </script>
+}
+
+<script>
+    document.getElementById('CurrencyFrom').addEventListener('change', function () {
+        var sourceValute = this.value;
+        var targetValuteSelect = document.getElementById('CurrencyTo');
+
+        if (sourceValute == 'RUB') {
+            targetValuteSelect.value = 'USD';
+        } else {
+            targetValuteSelect.value = 'RUB';
+        }
+    });
+    document.getElementById('CurrencyTo').addEventListener('change', function () {
+        var targetValute = this.value;
+        var sourceValuteSelect = document.getElementById('CurrencyFrom');
+
+        if (targetValute == 'RUB') {
+            sourceValuteSelect.value = 'USD';
+        } else {
+            sourceValuteSelect.value = 'RUB';
+        }
+    });
+</script>
+
+<script>
+    document.getElementById("submitForm").addEventListener("submit", function (event) {
+        const appointmentDateTimeInput = document.querySelector('input[type="datetime-local"]');
+        const appointmentDateTime = new Date(appointmentDateTimeInput.value);
+        const hours = appointmentDateTime.getHours();
+
+        if (hours < 9 || hours > 18) {
+            event.preventDefault();
+            alert("Выберите время между 09:00 и 18:00.");
+        }
+    });
+</script>

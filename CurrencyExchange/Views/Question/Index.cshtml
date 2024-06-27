@@ -1,0 +1,78 @@
+﻿@using CurrencyExchange.ViewModels
+@model QuestionsVM
+
+@{
+    ViewData["Title"] = "FAQ";
+}
+
+<div class="question-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="question-title">Ваши вопросы</h1>
+                <p class="question-subtitle">Выгодный обмен валют от банка. Информация о курсах обмена иностранных валют является справочной и может меняться в течение дня</p>
+            </div>
+            <div class="col-md-4 text-left">
+                <img src="\images\icon6.png" alt="Currency transfer" class="question-image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="divider"></div>
+
+<h1 class="header">Популярные вопросы</h1>
+<div class="faq-questions">
+    @foreach (var question in Model.MainQuestions!)
+    {
+        <div class="faq-question">
+            <button class="question-toggle">
+                @question.Quest
+                <span class="toggle-icon">+</span>
+            </button>
+            <div class="answer">
+                @question.Answer
+            </div>
+        </div>
+    }
+</div>
+
+<h1 class="header">Задать свой вопрос</h1>
+<div class="question-form">
+    <form asp-action="AddQuestion" method="post" >
+        <div class="form-group">
+            <label asp-for="Name">Ваше имя</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Email">Ваш Email</label>
+            <input asp-for="Email" class="form-control" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Quest">Ваш вопрос</label>
+            <textarea asp-for="Quest" class="form-control"></textarea>
+            <span asp-validation-for="Quest" class="text-danger"></span>
+        </div>
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary">Отправить</button>
+        </div>
+    </form>
+</div>
+
+@section css {
+    <link rel="stylesheet" href="~/css/faq.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $(".question-toggle").click(function () {
+                $(this).next(".answer").toggle();
+                $(this).find(".toggle-icon").text(function (_, value) { return value == '+' ? '-' : '+' });
+            });
+        });
+    </script>
+}

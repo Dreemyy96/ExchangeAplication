@@ -1,0 +1,84 @@
+﻿@using CurrencyExchange.ViewModels
+@model EditUserVM
+
+@{
+    ViewData["Title"] = "Редактирование личных данных";
+}
+
+<div class="container mt-5">
+    <h1>Редактирование личных данных</h1>
+
+    <form asp-action="Edit" method="post">
+        <div class="form-group">
+            <label for="Name" class="mb-2">Имя</label>
+            <input type="text" class="form-control mb-2" id="Name" name="Name" value="@Model.Name" />
+        </div>
+        <div class="form-group">
+            <label for="Email" class="mb-2">Email</label>
+            <input type="email" class="form-control mb-2" id="Email" name="Email" value="@Model.Email" />
+        </div>
+        <div class="form-group">
+            <label for="Phone" class="mb-2">Телефон</label>
+            <input type="text" class="form-control mb-2" id="Phone" name="Phone" value="@Model.Phone" />
+        </div>
+        <div class="form-group">
+            <label asp-for="Address" class="form-label mb-2">Адрес</label>
+            <input id="address" asp-for="Address" class="form-control mb-2" value="@Model.Address" required autocomplete="off" />
+            <div id="suggestions"></div>
+            <span asp-validation-for="Address" class="text-danger"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Сохранить</button>
+    </form>
+</div>
+
+@section Scripts{
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var apiKey = '26d9b4bd-865e-4e8e-89e5-b7a96fadf929';
+
+            $("#address").keyup(function () {
+                var query = $(this).val();
+                if (query.length > 2) {
+                    $.ajax({
+                        url: 'https://geocode-maps.yandex.ru/1.x/',
+                        data: {
+                            format: 'json',
+                            apikey: apiKey,
+                            geocode: query,
+                            results: 5
+                        },
+                        dataType: "json",
+                        success: function (data) {
+                            var suggestions = $("#suggestions");
+                            suggestions.empty();
+                            var items = data.response.GeoObjectCollection.featureMember;
+                            if (items.length > 0) {
+                                suggestions.show();
+                                items.forEach(function (item) {
+                                    var address = item.GeoObject.metaDataProperty.GeocoderMetaData.text;
+                                    suggestions.append('<div class="suggestion-item">' + address + '</div>');
+                                });
+                            } else {
+                                suggestions.hide();
+                            }
+
+                            $(".suggestion-item").click(function () {
+                                $("#address").val($(this).text());
+                                suggestions.hide();
+                            });
+                        },
+                        error: function () {
+                            $("#suggestions").hide();
+                        }
+                    });
+                } else {
+                    $("#suggestions").hide();
+                }
+            });
+        });
+    </script>
+}
+
+@section css {
+    <link rel="stylesheet" href="~/css/edit.css" asp-append-version="true" />
+}

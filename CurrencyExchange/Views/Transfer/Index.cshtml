@@ -1,0 +1,300 @@
+﻿@using CurrencyExchange.CurrencyEnum
+@using CurrencyExchange.ViewModels
+@model TransferRequestVM
+
+@{
+    ViewData["Title"] = "Заявка на международный перевод";
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        @foreach (var key in ViewData.ModelState.Keys)
+        {
+            foreach (var error in ViewData.ModelState[key]!.Errors)
+            {
+                @error.ErrorMessage
+
+                <br />
+            }
+        }
+    </div>
+}
+<div class="transfer-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="transfer-title">Международный перевод</h1>
+                <p class="transfer-subtitle">Выгодный обмен валют от банка. Информация о курсах обмена иностранных валют является справочной и может меняться в течение дня</p>
+            </div>
+            <div class="col-md-4 text-left">
+                <img src="\images\icon5.png" alt="Currency transfer" class="transfer-image">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row d-flex align-item-center justify-content-center">
+    <div class="divider"></div>
+    <h1 class="form-tittle">Заявка на международный перевод</h1>
+    <div class="col-md-8 card p-5">
+        <form asp-action="Index" method="post" id="submitForm">
+            <div class="row">
+                <div class="card mb-4 h-100">
+                    <div class="card-header">
+                        Банк партнер
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label asp-for="BankId" class="form-label">Банк</label>
+                            <select asp-for="BankId" class="form-control" required>
+                                @foreach (var bank in ViewBag.Banks as SelectList)
+                                {
+                                    <option value="@bank.Value">@bank.Text</option>
+                                }
+                            </select>
+                            <span asp-validation-for="BankId" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="card mb-4 h-100">
+                    <div class="card-header">
+                        Дата и время посещения
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3 row">
+                            <div class="col-md-6">
+                                <label asp-for="AppointmentDate" class="form-label">Дата</label>
+                                <input asp-for="AppointmentDate" type="date" class="form-control" required min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="AppointmentDate" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="AppointmentTime" class="form-label">Время</label>
+                                <input asp-for="AppointmentTime" type="time" class="form-control" required min="09:00" max="18:00" />
+                                <span asp-validation-for="AppointmentTime" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Личные данные
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="Name" class="form-label">Имя</label>
+                                <input asp-for="Name" class="form-control" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Email" class="form-label">Электронная почта</label>
+                                <input asp-for="Email" class="form-control" readonly />
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="Address" class="form-label">Адрес</label>
+                                <input asp-for="Address" class="form-control" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">            
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Данные получателя
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label asp-for="RecipientName" class="form-label">Имя получателя</label>
+                                <input asp-for="RecipientName" class="form-control" required />
+                                <span asp-validation-for="RecipientName" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="RecipientAccount" class="form-label">Счет получателя</label>
+                                <input asp-for="RecipientAccount" class="form-control" required />
+                                <span asp-validation-for="RecipientAccount" class="text-danger"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="RecipientAddress" class="form-label">Адрес получателя</label>
+                                <input id="address" asp-for="RecipientAddress" class="form-control" required autocomplete="off" />
+                                <div id="suggestions"></div>
+                                <span asp-validation-for="RecipientAddress" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Сумма и валюта перевода
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <label asp-for="Amount" class="form-label"></label>
+                                    <input asp-for="Amount" class="form-control" required />
+                                    <span asp-validation-for="Amount" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <label asp-for="Currency" class="form-label"></label>
+                                    <select asp-for="Currency" class="form-control" required>
+                                        @foreach (var value in Enum.GetValues(typeof(AvailableValute)))
+                                        {
+                                            <option value="@value">@value</option>
+                                        }
+                                    </select>
+                                    <span asp-validation-for="Currency" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card mb-4 h-100">
+                        <div class="card-header">
+                            Дополнительная информация
+                        </div>
+                        <div class="card-body">
+                            <label asp-for="AddittionalInfo" class="form-label">Дополнительная информация</label>
+                            <textarea asp-for="AddittionalInfo" class="form-control" rows="1"></textarea>
+                            <span asp-validation-for="AddittionalInfo" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-end">
+                <p style="font-weight:500;font-size:24pt;text-align:left;">Введите параметры</p>
+                <p style="margin-bottom:50px; opacity:0.7;text-align:left;"> Нажмите кнопку Продолжить</p>
+                <div class="text-center">
+                    <button type="submit" form="submitForm" class="btn btn-primary btn-on-page">Продолжить</button>
+                    <button type="button" class="btn btn-secondary btn-on-page" onclick=" location.href='@Url.Action("Index", "Valute")'">
+                        На главную
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container">
+    <div class="divider"></div>
+    <h2 class="map-title">Банки партнеры</h2>
+    <div id="map"></div>
+</div>
+
+
+@section css {
+    <link rel="stylesheet" href="~/css/transfer.css" asp-append-version="true" />
+}
+
+@section Scripts {
+    <script type="text/javascript">
+        ymaps.ready(init);
+        function init() {
+            // Создание карты.
+            var myMap = new ymaps.Map("map", {
+                center: [47.222078, 39.720349], // Координаты центра карты (Ростов-на-Дону)
+                zoom: 12
+            });
+
+            // Добавление меток.
+            var placemarks = [
+                {
+                    coords: [47.283833, 39.715286],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, просп. Космонавтов, 15'
+                },
+                {
+                    coords: [47.235676, 39.714530],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, площадь Гагарина, 6/87'
+                },
+                {
+                    coords: [47.207645, 39.632330],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, Коммунистический просп., 27'
+                },
+                {
+                    coords: [47.232200, 39.760530],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, 1-я Майская ул., 3'
+                },
+                {
+                    coords: [47.219887, 39.719437],
+                    hint: 'Альфа-Банк',
+                    balloon: 'Альфа-Банк, Ворошиловский просп., 31'
+                }
+            ];
+
+            placemarks.forEach(function (placemark) {
+                var myPlacemark = new ymaps.Placemark(placemark.coords, {
+                    hintContent: placemark.hint,
+                    balloonContent: placemark.balloon
+                });
+                myMap.geoObjects.add(myPlacemark);
+            });
+        }
+    </script>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var apiKey = '26d9b4bd-865e-4e8e-89e5-b7a96fadf929';
+
+            $("#address").keyup(function () {
+                var query = $(this).val();
+                if (query.length > 2) {
+                    $.ajax({
+                        url: 'https://geocode-maps.yandex.ru/1.x/',
+                        data: {
+                            format: 'json',
+                            apikey: apiKey,
+                            geocode: query,
+                            results: 5  
+                        },
+                        dataType: "json",
+                        success: function (data) {
+                            var suggestions = $("#suggestions");
+                            suggestions.empty();
+                            var items = data.response.GeoObjectCollection.featureMember;
+                            if (items.length > 0) {
+                                suggestions.show();
+                                items.forEach(function (item) {
+                                    var address = item.GeoObject.metaDataProperty.GeocoderMetaData.text;
+                                    suggestions.append('<div class="suggestion-item">' + address + '</div>');
+                                });
+                            } else {
+                                suggestions.hide();
+                            }
+
+                            $(".suggestion-item").click(function () {
+                                $("#address").val($(this).text());
+                                suggestions.hide();
+                            });
+                        },
+                        error: function () {
+                            $("#suggestions").hide();
+                        }
+                    });
+                } else {
+                    $("#suggestions").hide();
+                }
+            });
+        });
+    </script>
+    <script>
+        document.getElementById("submitForm").addEventListener("submit", function (event) {
+            const appointmentDateTimeInput = document.querySelector('input[type="datetime-local"]');
+            const appointmentDateTime = new Date(appointmentDateTimeInput.value);
+            const hours = appointmentDateTime.getHours();
+
+            if (hours < 9 || hours > 18) {
+                event.preventDefault();
+                alert("Выберите время между 09:00 и 18:00.");
+            }
+        });
+    </script>
+}

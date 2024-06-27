@@ -1,0 +1,115 @@
+﻿@using CurrencyExchange.ViewModels;
+@model RegisterVM
+
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container-reg">
+    <div class="col-md-4 card p-3">
+        <h2 class="text-center">Register</h2>
+        <form asp-action="Register" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-1">
+                <label asp-for="FirstName" class="control-label">Имя</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="LastName" class="control-label">Фамилия</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="Email" class="control-label">Электронная почта</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="Phone" class="control-label">Номер телефона</label>
+                <input asp-for="Phone" class="form-control" />
+                <span asp-validation-for="Phone" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="Password" class="control-label">Пароль</label>
+                <input asp-for="Password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="ConfirmPassword" class="control-label">Повторите пароль</label>
+                <input asp-for="ConfirmPassword" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+            <div class="mb-1">
+                <label asp-for="Address" class="form-label">Адрес</label>
+                <input id="address" asp-for="Address" class="form-control" required autocomplete="off" />
+                <div id="suggestions"></div>
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-8">
+                    <a asp-action="Login" class="text-decoration-none float-start mt-2">Есть аккаунт?</a>
+                </div>
+                <div class="col-4">
+                    <input type="submit" value="Register" class="btn btn-primary btn-sm float-end" />
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            var apiKey = '26d9b4bd-865e-4e8e-89e5-b7a96fadf929';
+
+            $("#address").keyup(function () {
+                var query = $(this).val();
+                if (query.length > 2) {
+                    $.ajax({
+                        url: 'https://geocode-maps.yandex.ru/1.x/',
+                        data: {
+                            format: 'json',
+                            apikey: apiKey,
+                            geocode: query,
+                            results: 5
+                        },
+                        dataType: "json",
+                        success: function (data) {
+                            var suggestions = $("#suggestions");
+                            suggestions.empty();
+                            var items = data.response.GeoObjectCollection.featureMember;
+                            if (items.length > 0) {
+                                suggestions.show();
+                                items.forEach(function (item) {
+                                    var address = item.GeoObject.metaDataProperty.GeocoderMetaData.text;
+                                    suggestions.append('<div class="suggestion-item">' + address + '</div>');
+                                });
+                            } else {
+                                suggestions.hide();
+                            }
+
+                            $(".suggestion-item").click(function () {
+                                $("#address").val($(this).text());
+                                suggestions.hide();
+                            });
+                        },
+                        error: function () {
+                            $("#suggestions").hide();
+                        }
+                    });
+                } else {
+                    $("#suggestions").hide();
+                }
+            });
+        });
+    </script>
+}
+
+@section css{
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+}

@@ -1,0 +1,215 @@
+﻿@using CurrencyExchange.CurrencyEnum
+@using CurrencyExchange.ViewModels
+@model CurrencyRateVM
+
+@{
+    ViewData["Title"] = "Currency Rate";
+}
+
+<div class="exchange-banner">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="exchange-title">Курсы валют</h1>
+                <p class="exchange-subtitle">Выгодный обмен валют от банка. Информация о курсах обмена иностранных валют является справочной и может меняться в течение дня</p>
+                <form asp-controller="Application" asp-action="ExchangeApplication" method="get">
+                    <button type="submit" class="btn btn-primary btn-exchange btn-on-page">
+                        Обменять в банке
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-4 text-center">
+                <img src="\images\icon1.png" alt="Currency Exchange" class="exchange-image">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h1 class="header">Курсы валют ЦБ РФ на сегодня</h1>
+            <div class="table-responsive p-4 mx-auto">
+
+                <table class="table">
+                    <tbody>
+                        @foreach (var currency in Model.Currencies)
+                        {
+                            <tr>
+                                @if (currency.Nominal > 1)
+                                {
+                                    <td class="name">@currency.Code - @currency.Name (за @currency.Nominal ед.)</td>
+                                }
+                                else
+                                {
+                                    <td class="name">@currency.Code - @currency.Name</td>
+                                }
+                                <td class="sale">
+                                    @currency.SaleValue
+                                    <div class="label-sale">Сегодня</div>
+                                </td>
+                                <td>
+                                    <div class="arrow">
+                                        @if (currency.SaleValue > currency.PreviousValue)
+                                        {
+                                            <i class="arrow-up"></i>
+                                        }
+                                        else if (currency.SaleValue < currency.PreviousValue)
+                                        {
+                                            <i class="arrow-down"></i>
+                                        }
+                                    </div>
+                                </td>
+                                <td class="buy">
+                                    @currency.PreviousValue
+                                    <div class="label-buy">Вчера</div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="row justify-content-center mt-4">
+    <div class="col-md-11">
+        <h1 class="header2">Калькулятор валют</h1>
+        <div class="calculator p-5 row">
+            <div class="col-md-6 mb-3 mb-md-0">
+                <form id="currencyForm" method="post">
+                    <div class="mb-3">
+                        <label for="SourceValute" class="form-label">У меня есть</label>
+                        <div class="mb-3">
+                            <select id="SourceValute" name="SourceValute" class="form-control mb-2" style="height: 50px;">
+                                @foreach (var value in Enum.GetValues(typeof(AvailableValute)))
+                                {
+                                    @if (Model.SourceValute.ToString() == value.ToString() || (Model.SourceValute == AvailableValute.RUB && value.ToString() == "RUB"))
+                                    {
+                                        <option value="@value" selected>@value</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@value">@value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <input type="number" id="Amount" name="Amount" value="@Model.Amount" class="form-control" placeholder="Сумма обмена"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="TargetValute" class="form-label">Я получу</label>
+                        <div class="mb-3">
+                            <select id="TargetValute" name="TargetValute" class="form-control mb-2" style="height: 50px;">
+                                @foreach (var value in Enum.GetValues(typeof(AvailableValute)))
+                                {
+                                    @if (Model.TargetValute.ToString() == value.ToString())
+                                    {
+                                        <option value="@value" selected>@value</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@value">@value</option>
+                                    }
+                                }
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" id="Result" name="Result" value="@Model.Result" readonly class="form-control" placeholder="Полученная сумма"/>
+                        </div> 
+                    </div>
+                </form>
+            </div>
+
+            <!-- Правая часть карточки -->
+            <div class="col-md-6 text-end">
+                <p style="font-weight:500;font-size:24pt;">Выберите параметры</p>
+                <p style="margin-bottom:50px; opacity:0.7;"> Нажмите кнопку Рассчитать</p>
+                <button type="submit" form="currencyForm" class="btn btn-primary btn-square btn-on-page">
+                    <i class="fas fa-arrow-right"></i> Рассчитать
+                </button>
+                <form asp-controller="Application" asp-action="RedirectWithAnchor" method="get">
+                    <input type="hidden" name="anchor" value="exchangeForm" />
+                    <button type="submit" class="btn btn-secondary btn-square mt-2 btn-on-page">
+                        Оформить заявку
+                    </button>
+                </form>
+                <div class="underline-text">Предварительный расчет. Не является публичной офертой</div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="related-content mt-4">
+    <div class="container">
+        <h1 class="related-title">Вам может быть интересно</h1>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card related-card d-flex flex-row justify-content-between align-items-center">
+                    <div class="card-body">
+                        <h3 class="card-title">Международные переводы</h3>
+                        <p class="card-text">Переводите за границу в любую страну удобным вам способом</p>
+                        <form asp-controller="Transfer" asp-action="Index" method="get">
+                            <button type="submit" class="btn btn-outline-primary btn-on-page">
+                                Подробнее
+                            </button>
+                        </form>
+                    </div>
+                    <img src="\images\icon2.png" alt="Международные переводы" class="related-image">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card related-card d-flex flex-row justify-content-between align-items-center">
+                    <div class="card-body">
+                        <h3 class="card-title">Вопросы</h3>
+                        <p class="card-text">Получите ответ на интересующий вас вопрос, либо задайте свой</p>
+                        <form asp-controller="Question" asp-action="Index" method="get">
+                            <button type="submit" class="btn btn-outline-primary btn-on-page">
+                                Подробнее
+                            </button>
+                        </form>
+                    </div>
+                    <img src="\images\icon3.png" alt="Вопросы" class="related-image">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section css {
+    <link rel="stylesheet" href="~/css/valute.css" asp-append-version="true" />
+}
+
+<script>
+    document.getElementById('SourceValute').addEventListener('change', function () {
+        var sourceValute = this.value;
+        var targetValuteSelect = document.getElementById('TargetValute');
+
+        if (sourceValute == 'RUB') {
+            targetValuteSelect.value = 'USD';
+        }
+        else {
+            targetValuteSelect.value = 'RUB';
+        }
+
+    });
+    document.getElementById('TargetValute').addEventListener('change', function () {
+        var targetValute = this.value;
+        var sourceValuteSelect = document.getElementById('SourceValute');
+
+        if (targetValute == 'RUB') {
+            sourceValuteSelect.value = 'USD';
+        }
+        else {
+            sourceValuteSelect.value = 'RUB';
+        }
+
+    });
+</script>
